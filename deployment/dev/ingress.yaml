@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-ingress
+  namespace: dev
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: mykube.freeddns.org #TODO
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+             service:
+              name: theme-park-ride-service
+              port:
+                number: 80
