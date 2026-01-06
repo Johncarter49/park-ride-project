@@ -1,0 +1,29 @@
+pipeline {
+  agent any
+
+  environment {
+    IMAGE_NAME = "registry.gitlab.com/jhiberne/theme-park-ride-gradle:latest" 
+    CHART_DIR = "deployment/charts/theme-park-ride"
+    NAMESPACE = "dev"
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        git branch: 'develop', url: 'https://github.com/tsingh38/theme-park-devops.git'
+      }
+    }
+
+    stage('Helm Deploy to Dev') {
+      steps {
+        sh """
+          helm upgrade --install theme-park-ride ./${CHART_DIR} \
+            --namespace ${NAMESPACE} \
+            --create-namespace \
+            --set image.repository=${IMAGE_NAME.split(':')[0]} \
+            --set image.tag=${IMAGE_NAME.split(':')[1]}
+        """
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+# TODO 
+
+appName: theme-park-ride
+
+replicaCount: 3
+
+image:
+  repository: registry.gitlab.com/jhiberne/theme-park-ride-gradle
+  tag: latest
+
+containerPort: 5000
+
+service:
+  type: NodePort
+  port: 80
+  targetPort: 5000
+  nodePort: 30085
+
+ingress:
+  enabled: true
+  className: traefik
+  host: mykube.freeddns.org
+  path: /
+  pathType: Prefix
