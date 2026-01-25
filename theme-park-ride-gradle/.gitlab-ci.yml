@@ -23,13 +23,10 @@ stages:
 
 build:
   stage: build
-  image: openjdk:12-alpine
+  image: eclipse-temurin:8-jdk
   before_script:  
     - chmod +x ./gradlew
   script:
-    - sed -i "s/CI_PIPELINE_IID/$CI_PIPELINE_IID/" ./src/main/resources/application.yml
-    - sed -i "s/CI_COMMIT_SHORT_SHA/$CI_COMMIT_SHORT_SHA/" ./src/main/resources/application.yml
-    - sed -i "s/CI_COMMIT_BRANCH/$CI_COMMIT_BRANCH/" ./src/main/resources/application.yml
     - ./gradlew build
   artifacts:
     paths:
@@ -40,11 +37,11 @@ build:
 
 smoke test:
   stage: test
-  image: openjdk:12-alpine
+  image: eclipse-temurin:8-jdk
   before_script:
-    - apk --no-cache add curl
+    - apt-get update && apt-get install -y curl
   script:
-    - java -jar ./build/libs/theme-park-ride-gradle.jar &
+    - SPRING_PROFILES_ACTIVE=dev java -jar ./build/libs/theme-park-ride-gradle.jar &
     - sleep 30
     - curl http://localhost:5000/actuator/health | grep "UP"
   only:
@@ -53,7 +50,7 @@ smoke test:
 
 unit test:
   stage: test
-  image: openjdk:12-alpine
+  image: eclipse-temurin:8-jdk
   before_script:  
     - chmod +x ./gradlew
   script:
@@ -70,7 +67,7 @@ unit test:
 
 PMDTest:
   stage: quality
-  image: openjdk:12-alpine
+  image: eclipse-temurin:8-jdk
   before_script:  
     - chmod +x ./gradlew
   script:
@@ -108,8 +105,8 @@ review:
   - apk add --no-cache --quiet py-pip
   - pip install --quiet docker-compose~=1.23.0
   - export DOCKER_HOST=tcp://$PLAYWD.direct.labs.play-with-docker.com:2375
-  - docker-compose down
-  - docker-compose up -d
+  - docker-compose -f docker-compose.yml -f docker-compose.dev.yml down
+  - docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
   environment:
     name: review
     url: http://$PLAYWD-5000.direct.labs.play-with-docker.com/ride/
@@ -129,7 +126,7 @@ staging:
     - aws configure set region us-east-1
     - aws s3 cp ./build/libs/theme-park-ride-gradle.jar s3://$S3_BUCKET/$ARTIFACT_NAME
     - aws elasticbeanstalk create-application-version --application-name $APP_NAME --version-label $CI_PIPELINE_IID --source-bundle S3Bucket=$S3_BUCKET,S3Key=$ARTIFACT_NAME
-    - CNAME=$(aws elasticbeanstalk update-environment --application-name $APP_NAME --environment-name "tpr-staging-jennifer" --version-label=$CI_PIPELINE_IID | jq '.CNAME' --raw-output)
+    - CNAME=$(aws elasticbeanstalk update-environment --application-name $APP_NAME --environment-name "tpr-staging-jennifer" --version-label=$CI_PIPELINE_IID --option-settings Namespace=aws:elasticbeanstalk:application:environment,OptionName=APP_VERSION,Value=$CI_PIPELINE_IID Namespace=aws:elasticbeanstalk:application:environment,OptionName=APP_COMMIT,Value=$CI_COMMIT_SHORT_SHA Namespace=aws:elasticbeanstalk:application:environment,OptionName=APP_BRANCH,Value=$CI_COMMIT_BRANCH | jq '.CNAME' --raw-output)
     - sleep 45
     - curl http://$CNAME/actuator/health | grep "UP"
     - curl http://$CNAME/actuator/info | grep $CI_PIPELINE_IID
@@ -153,7 +150,7 @@ production:
     - apk --no-cache add jq
   script:
     - aws configure set region us-east-1
-    - CNAME=$(aws elasticbeanstalk update-environment --application-name $APP_NAME --environment-name "tpr-production-jennifer" --version-label=$CI_PIPELINE_IID | jq '.CNAME' --raw-output)
+    - CNAME=$(aws elasticbeanstalk update-environment --application-name $APP_NAME --environment-name "tpr-production-jennifer" --version-label=$CI_PIPELINE_IID --option-settings Namespace=aws:elasticbeanstalk:application:environment,OptionName=APP_VERSION,Value=$CI_PIPELINE_IID Namespace=aws:elasticbeanstalk:application:environment,OptionName=APP_COMMIT,Value=$CI_COMMIT_SHORT_SHA Namespace=aws:elasticbeanstalk:application:environment,OptionName=APP_BRANCH,Value=$CI_COMMIT_BRANCH | jq '.CNAME' --raw-output)
     - sleep 45
     - curl http://$CNAME/actuator/health | grep "UP"
     - curl http://$CNAME/actuator/info | grep $CI_PIPELINE_IID

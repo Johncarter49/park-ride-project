@@ -4,5 +4,3 @@ services:
     image: theme-park-ride-gradle:local
     container_name: theme-park-ride-gradle
     mem_limit: 512M
-    ports:
-      - "5001:5000"

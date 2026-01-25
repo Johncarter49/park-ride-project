@@ -1,0 +1,12 @@
+spring:
+  h2:
+    console:
+      enabled: false
+  jpa:
+    show-sql: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

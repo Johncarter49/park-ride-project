@@ -1,0 +1,6 @@
+services:
+  theme-park-ride-gradle:
+    env_file:
+      - ./env/dev.env
+    ports:
+      - "5001:5000"

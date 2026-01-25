@@ -1,26 +1,27 @@
 spring:
+  application:
+    name: theme-park-ride-gradle
   datasource:
-    url: jdbc:h2:mem:testdb
-    driverClassName: org.h2.Driver
-    username: sa
-    password:
+    url: ${DB_URL:jdbc:h2:mem:testdb}
+    driverClassName: ${DB_DRIVER:org.h2.Driver}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-  h2:
-    console:
-      enabled: true
+    database-platform: ${DB_DIALECT:org.hibernate.dialect.H2Dialect}
+    hibernate:
+      ddl-auto: ${HIBERNATE_DDL_AUTO:update}
 
 server:
-  port: 5000
+  port: ${SERVER_PORT:5000}
 
 info:
   app:
-    version: CI_PIPELINE_IID
-    commit: CI_COMMIT_SHORT_SHA
-    branch: CI_COMMIT_BRANCH
+    version: ${APP_VERSION:unknown}
+    commit: ${APP_COMMIT:unknown}
+    branch: ${APP_BRANCH:unknown}
 
 management:
   endpoints:
     web:
       exposure:
-        include: '*'
+        include: health,info
