@@ -87,14 +87,11 @@ pipeline {
             }
         }
 
-        stage("Kubeconfig (optional)") {
+        stage("Kubeconfig") {
             steps {
-                script {
-                    if (!env.KUBECONFIG_CMD || env.KUBECONFIG_CMD.trim().isEmpty()) {
-                        error "KUBECONFIG_CMD is not set. Provide the exact command to generate kubeconfig."
-                    }
+                withCredentials([file(credentialsId: 'park-ride-kubernetes', variable: 'KUBECONFIG')]) {
+                    sh 'kubectl get nodes'
                 }
-                sh "${env.KUBECONFIG_CMD}"
             }
         }
     }
