@@ -73,7 +73,7 @@ pipeline {
         stage("Deploy Dev (auto)") {
             steps {
                 dir("${env.APP_DIR}") {
-                    sh "docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d"
+                    sh "docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d"
                 }
             }
         }
@@ -82,7 +82,7 @@ pipeline {
             steps {
                 input message: "Approve production deployment?"
                 dir("${env.APP_DIR}") {
-                    sh "docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d"
+                    sh "docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d"
                 }
             }
         }
