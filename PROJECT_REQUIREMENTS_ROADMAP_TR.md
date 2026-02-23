@@ -4,8 +4,8 @@ Bu doküman, mevcut repoyu verilen "Project Requirements & Expectations" listesi
 
 ## 1) Dockerize Your Application
 **Durum:** ✅ Büyük ölçüde tamam.
-- Multi-stage `Dockerfile` var (build + runtime).  
-- Compose ile çalıştırma var.  
+- Multi-stage `Dockerfile` var (build + runtime).
+- Compose ile çalıştırma var.
 - Registry kullanımına dair kanıt var (GitLab registry image örneği).
 
 **İyileştirme:**
@@ -44,9 +44,31 @@ Bu doküman, mevcut repoyu verilen "Project Requirements & Expectations" listesi
 - Registry push ve Kubernetes deploy adımları tek bir tutarlı pipeline tasarımında birleştirilsin.
 
 ## 6) Monitoring (Prometheus + Grafana / Datadog)
-**Durum:** ❌ Henüz yok.
-- Kod tabanında Prometheus/Grafana kurulumuna dair manifest, compose servisi veya dashboard provizyonu görünmüyor.
-- Actuator bağımlılığı var ama tek başına Prometheus+Grafana kurulumu anlamına gelmez.
+**Durum:** ✅ Tamam (Docker Compose monitoring stack ile).
+- `docker-compose.monitoring.yml` içinde Prometheus (`9090`) ve Grafana (`3000`) servisleri tanımlı.
+- Grafana admin kullanıcı bilgisi compose içinde tanımlı (`admin/admin`).
+- Prometheus scrape config ve Grafana datasource/dashboard provisioning dosyaları repoda mevcut.
+
+### Prometheus ve Grafana Nasıl Kullanılır? (Hızlı Rehber)
+1. Monitoring stack'i ayağa kaldır:
+   - `cd theme-park-ride-gradle`
+   - `docker compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d`
+2. Uygulamanın metrik endpoint'ini doğrula:
+   - `http://localhost:5001/actuator/prometheus`
+3. Prometheus arayüzüne gir:
+   - `http://localhost:9090`
+   - **Expression** alanına `up` yazıp **Execute** ile hedeflerin canlı olduğunu kontrol et.
+4. Grafana arayüzüne gir:
+   - `http://localhost:3000`
+   - Giriş: `admin` / `admin` (ilk girişte şifre değiştirme isteyebilir).
+5. Grafana'da dashboard kullanımı:
+   - Sol menüden **Dashboards** bölümüne gir.
+   - Provision edilmiş dashboard olarak `theme-park-overview` benzeri paneli aç.
+   - Zaman aralığını (son 5 dk / 1 saat) değiştirip metrik akışını gözlemle.
+6. Sık kullanılan Prometheus sorguları (örnek):
+   - `up`
+   - `rate(http_server_requests_seconds_count[5m])`
+   - `jvm_memory_used_bytes`
 
 ## 7) Security (DevSecOps)
 **Durum:** ⚠️ Kısmen.
@@ -87,7 +109,7 @@ Bu gereksinim setinde Terraform adı zorunlu geçmiyor; Kubernetes manifest/Helm
 ---
 
 ## 2 Haftalık Pratik Yol Haritası
-1. **Monitoring ekle (öncelik 1):** kube-prometheus-stack veya Prometheus+Grafana manifest/helm kur. En az 1 dashboard + 1 alert koy.
+1. **Monitoring'i üretim seviyesine taşı (öncelik 1):** Mevcut compose monitoring'i K8s ortamına da taşı (kube-prometheus-stack/helm), en az 1 alarm kuralı ekle.
 2. **Security hardening (öncelik 1):** Trivy scan'ı pipeline'a ekle; Dependabot/Snyk aç; secret'ları env yerine secret store'a taşı.
 3. **DR dokümanı (öncelik 2):** backup/restore ve rollback runbook yaz.
 4. **K8s konfigürasyonlarını tamamla (öncelik 2):** ConfigMap + Secret + namespace stratejisi.
@@ -97,5 +119,5 @@ Bu gereksinim setinde Terraform adı zorunlu geçmiyor; Kubernetes manifest/Helm
 ---
 
 ## "Her şey tamam mı?" için net cevap
-Bugünkü repoya göre: **Henüz tam değil.**  
-Özellikle monitoring (Prometheus/Grafana), DR planı, ve güvenlik maddelerinin en az 3 tanesinin açık/kanıtlı uygulanması tarafında boşluk var. Bu maddeleri kapattığında "tamam" diyebilirsin.
+Bugünkü repoya göre: **Kısmen tamam, hâlâ açık maddeler var.**
+Monitoring tarafı compose düzeyinde tamamlanmış durumda; ana boşluklar DR planı ve güvenlik maddelerinin en az 3 tanesinin açık/kanıtlı uygulanması tarafında. Bu maddeleri kapattığında "tamam" diyebilirsin.

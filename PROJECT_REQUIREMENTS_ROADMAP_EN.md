@@ -44,9 +44,31 @@ This document evaluates the current repository against the provided **Project Re
 - Keep image push + K8s deploy path consistent in one clear pipeline flow.
 
 ## 6) Monitoring (Prometheus + Grafana / Datadog)
-**Status:** ❌ Not implemented yet.
-- No clear Prometheus/Grafana manifests, compose services, or dashboards in repo.
-- Actuator dependency exists, but this is not a full monitoring stack by itself.
+**Status:** ✅ Complete (via Docker Compose monitoring stack).
+- `docker-compose.monitoring.yml` defines both Prometheus (`9090`) and Grafana (`3000`) services.
+- Grafana admin credentials are defined in compose (`admin/admin`).
+- Prometheus scrape config and Grafana datasource/dashboard provisioning files are present in the repository.
+
+### How to Use Prometheus and Grafana (Quick Guide)
+1. Start the monitoring stack:
+   - `cd theme-park-ride-gradle`
+   - `docker compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d`
+2. Verify the application metrics endpoint:
+   - `http://localhost:5001/actuator/prometheus`
+3. Open Prometheus UI:
+   - `http://localhost:9090`
+   - Run `up` in the **Expression** box and click **Execute** to verify targets are healthy.
+4. Open Grafana UI:
+   - `http://localhost:3000`
+   - Login with `admin` / `admin` (Grafana may request a password change on first login).
+5. Use dashboards in Grafana:
+   - Open **Dashboards** from the left menu.
+   - Open the provisioned dashboard (e.g., `theme-park-overview`).
+   - Change time range (last 5m / 1h) and inspect metric trends.
+6. Common Prometheus queries (examples):
+   - `up`
+   - `rate(http_server_requests_seconds_count[5m])`
+   - `jvm_memory_used_bytes`
 
 ## 7) Security (DevSecOps)
 **Status:** ⚠️ Partially complete.
@@ -84,7 +106,7 @@ You can satisfy deployment with Kubernetes manifests/Helm, but Terraform signifi
 ---
 
 ## Practical 2-Week Roadmap
-1. **Monitoring first:** install Prometheus + Grafana (or kube-prometheus-stack), add 1 dashboard and 1 alert.
+1. **Productionize monitoring first:** keep the existing compose monitoring stack and extend it to Kubernetes (kube-prometheus-stack/Helm), including at least 1 alert rule.
 2. **Security hardening:** add Trivy scan in CI, enable dependency scanning, migrate secrets to proper secret handling.
 3. **DR runbook:** document backup/restore + rollback scenarios.
 4. **K8s completeness:** add ConfigMap/Secret templates and namespace strategy.
@@ -94,5 +116,5 @@ You can satisfy deployment with Kubernetes manifests/Helm, but Terraform signifi
 ---
 
 ## "Is everything complete?"
-With the current repository state: **Not fully complete yet.**  
-Main gaps are monitoring, DR, and explicit implementation evidence for at least 3 security controls.
+With the current repository state: **Partially complete, with remaining gaps.**
+Monitoring is complete at Docker Compose level; main gaps are DR and explicit implementation evidence for at least 3 security controls.
