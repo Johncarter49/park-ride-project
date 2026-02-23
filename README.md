@@ -3,3 +3,8 @@
 This repo contains the `theme-park-ride-gradle` service. It supports separate development and production environments using Spring profiles and Docker Compose overrides.
 
 See `theme-park-devops/theme-park-ride-gradle/README.md` for environment-specific configuration and run instructions.
+
+
+## Requirement Gap Analysis
+- Turkish roadmap: `PROJECT_REQUIREMENTS_ROADMAP_TR.md`
+- English roadmap: `PROJECT_REQUIREMENTS_ROADMAP_EN.md`
