@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'theme-park-ride-gradle'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['theme-park-ride-gradle:5000']
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['prometheus:9090']
