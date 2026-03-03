@@ -1,0 +1,6 @@
+# Copy this file to terraform.tfvars and customize for your cluster.
+kubeconfig_path = "~/.kube/config"
+kube_context    = ""
+namespace       = "theme-park"
+release_name    = "theme-park-ride"
+environment     = "dev"
