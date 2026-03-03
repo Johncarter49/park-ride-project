@@ -37,3 +37,25 @@ http://<YOUR_VM_IP>:30085/ride
 ```
 
 > The output should match the Docker test response.
+
+---
+
+### Step 3: Deploy with Terraform + Helm
+
+Terraform configuration is available under `deployment/terraform` and installs the existing Helm chart (`deployment/charts/theme-park-ride`) into your cluster.
+
+```
+cd deployment/terraform
+cp terraform.tfvars.example terraform.tfvars
+
+# Optional: edit terraform.tfvars (environment=dev|prod, namespace, context)
+terraform init
+terraform plan
+terraform apply
+```
+
+To remove resources:
+
+```
+terraform destroy
+```
